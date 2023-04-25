@@ -5,6 +5,7 @@ https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/sec_data_dos_atprvn/configurat
 
 The script is designed for Linux operating systems and should be run as root.
 ![image](https://user-images.githubusercontent.com/131812058/234381308-f5885015-839d-4aeb-bbc8-7da50862e12f.png)
+
 The script has three modes: “Sniffer mode”, “Manual defender mode”, and “Dynamic defender mode”. The first mode acts as a packet sniffer for SYN packets and will calculate and print statistics to a CSV file.
-![image](https://user-images.githubusercontent.com/131812058/234381954-532ec7ea-f3c2-4bf7-8dcb-d6d46b53b7ee.png)
 This mode ties in with the Manual defender mode as it allows users to determine appropriate values for the threshold and interval. The final mode, Dynamic defender, calculates a moving average of SYNs per second and compares the current and previous of these averages to determine if there is an attack occurring.
+

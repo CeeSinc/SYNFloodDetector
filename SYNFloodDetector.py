@@ -301,7 +301,7 @@ def main(queue):
     choice = usrchoice()
     if choice == "1":
         print("\n" + "~"*50)
-        print("Sniffing for SYNs...".center(50))
+        print("Sniffing SYNs".center(50))
         print("~"*50 + "\n")
         choice_shared.value = 1
     elif choice == "2":
@@ -322,12 +322,12 @@ def main(queue):
                 continue
             break
         print("\n" + "~"*50)
-        print("Detecting for SYN floods".center(50))
+        print("Detecting SYN floods".center(50))
         print("~"*50 + "\n")
         choice_shared.value = 2
     elif choice == "3":
         print("\n" + "~"*50)
-        print("Detecting for SYN floods".center(50))
+        print("Detecting SYN floods".center(50))
         print("~"*50 + "\n")
         choice_shared.value = 3
         

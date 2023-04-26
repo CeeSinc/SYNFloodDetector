@@ -19,7 +19,8 @@ import time
 from datetime import datetime
 import sys
 import signal
-from multiprocessing import Process, Pipe, Value, RawValue
+from multiprocessing import Process, Pipe, Queue, Value, RawValue
+from queue import Empty, Full
 import csv
 import paramiko
 import atexit
@@ -128,7 +129,7 @@ def tcppackets(conn):
             conn.send(syn_count)           
 
 
-def tcpcount(conn, connmain):
+def tcpcount(conn, queue):
     """
     receives data from function tcppackets and counts the amount
     of SYN packets received in one second, and uses this to calculate
@@ -197,20 +198,25 @@ def tcpcount(conn, connmain):
                 syn_interval.append(syn)
                 if len(syn_interval) == user_interval:
                     total = sum(syn_interval)
-                    averagesyn = sum(syn_interval) / user_interval
-                    #average = ("{:.2f}".format((sum(syn_interval)) / user_interval))
-                    print("Total SYN per interval: {}".format(total))
-                    print("Average SYN per second in last interval: {}     ".format(averagesyn))
-                    connmain.send(averagesyn) # sends the value to main
+                    averagesyn = total // user_interval
+                    print("Total SYN per interval: {}\nAverage SYN per second in last interval: {}     "
+                    .format(total, averagesyn))
+                    try:
+                        queue.put(averagesyn, block=False) # puts the value in the queue for main to get
+                    except Full:
+                        queue.get() # empties the queue
                     syn_interval.clear()
             
             elif defencemode:
                 # if user selects dynamic defence mode, calculates the moving average of the last ten seconds
                 movingave.append(syn)
                 if len(movingave) == 10:
-                    ave = sum(movingave) / 10
+                    ave = sum(movingave) // 10
                     print("Average SYN/s: {}".format(ave))
-                    connmain.send(ave) # sends the value to main
+                    try:
+                        queue.put(ave, block=False) # puts the value in the queue for main to get
+                    except Full:
+                        queue.get() # empties the queue
                     del movingave[0]         
 
             continue
@@ -249,12 +255,12 @@ def SSHrouter(command):
         connection.close()
         print("\033[33;1;4m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~TCP Intercept:" + text + "\033[0m")
     except paramiko.ssh_exception.NoValidConnectionsError:
-        print("\033[33;1;4m~~Could not establish a connection to the Router~~\033[0m")
+        print("\033[33;1;4m~~~~Could not establish a connection to the Router\033[0m")
     except paramiko.ssh_exception.SSHException:
-        print("\033[33;1;4m~~Could not establish a connection to the Router~~\033[0m")
+        print("\033[33;1;4m~~~~Could not establish a connection to the Router\033[0m")
     except socket.error:
-        print("\033[33;1;4m~~Could not establish a connection to the Router~~\033[0m")
-        
+        print("\033[33;1;4m~~~~Could not establish a connection to the Router\033[0m")
+
 
 def usrchoice():
     """
@@ -276,10 +282,10 @@ def usrchoice():
             print("\n~~~~~~~~~~~~~~Select a valid option~~~~~~~~~~~~~~~\n")
                
  
-conn3, conn4 = Pipe(duplex=False) # creates a pipe between main(receiver) and TCPcount(sender)
- 
+q = Queue(maxsize = 1) # creates a queue with size 1, used to share data between TCPcount and main
     
-def main(conn):
+    
+def main(queue):
     # defines global variables used across functions
     global total_syn_count
     global interval
@@ -326,7 +332,7 @@ def main(conn):
     conn1, conn2 = Pipe(duplex=False)  # creates a pipe between TCPcount(receiver) and TCPpackets(sender)
     # create two processes with pipe between
     tcp_packets = Process(target=tcppackets, daemon=True, args=(conn2,), name="TCPpackets")
-    tcp_count = Process(target=tcpcount, daemon=True, args=(conn1,conn4), name="TCPcount")
+    tcp_count = Process(target=tcpcount, daemon=True, args=(conn1,q), name="TCPcount")
     start = datetime.utcnow() # records start time of SYN detection
     startstring = str(start)
     
@@ -347,7 +353,10 @@ def main(conn):
         flood = False
         
         while True:
-            averagesyn = conn.recv() # receives average from TCPcount
+            try:
+                averagesyn = queue.get(block=False) # gets average from TCPcount
+            except Empty:
+                continue
             if not flood: # if current average > threshold: Flood
                 if averagesyn < threshold or averagesyn == threshold:
                     print("\033[32;1;4m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Normal Traffic\033[0m", end="\r", flush=True)
@@ -372,7 +381,10 @@ def main(conn):
         flood = False
         
         while True:
-            movingaverage = conn.recv() # receives moving average from TCPcount
+            try: 
+                movingaverage = queue.get(block=False) # gets moving average from TCPcount
+            except Empty:
+                continue
             avlist.append(movingaverage) # stores the current moving average and last moving average
             if len(avlist) == 2:
                 if not flood: # if current moving average > twice the last moving average: Flood
@@ -396,5 +408,4 @@ def main(conn):
     
         
 if __name__ == '__main__':
-    main(conn3)
- 
+    main(q)

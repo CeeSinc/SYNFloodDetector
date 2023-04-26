@@ -64,8 +64,10 @@ def on_exit():
     if choice_shared.value == 1:
         end = datetime.utcnow() # records endtime
         endstring = str(end)
+        endstring = endstring[:-7]
         duration = end - start # duration
         timestring = str(duration)
+        timestring = timestring[:-7]
         seconds = duration.total_seconds() # duration in seconds
         # writes data to csv file
         with open("SYNhistory.csv", 'a') as file:
@@ -335,6 +337,7 @@ def main(queue):
     tcp_count = Process(target=tcpcount, daemon=True, args=(conn1,q), name="TCPcount")
     start = datetime.utcnow() # records start time of SYN detection
     startstring = str(start)
+    startstring = startstring[:-7]
     
     if choice == "1":
         with open("SYNhistory.csv", 'a') as file:

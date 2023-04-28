@@ -1,4 +1,5 @@
-~~~~~~~
+Title,Value
+~~~~~~~,
 start: ,2023-03-30 13:25:15
 Total SYN/m: ,912
 Average SYN/s in last minute: ,15.20
@@ -14,7 +15,7 @@ end: ,2023-03-30 13:30:47
 duration: ,0:05:31
 Total SYN: ,4064
 Average SYN/s: ,12.26
-~~~~~~~
+~~~~~~~,
 start: ,2023-04-07 19:47:54
 Total SYN/m: ,5487007
 Average SYN/s in last minute: ,91450.12
@@ -30,7 +31,7 @@ end: ,2023-04-07 19:53:17
 duration: ,0:05:22
 Total SYNs: ,34821600
 Average SYN/s: ,107936.46
-~~~~~~~
+~~~~~~~,
 start: ,2023-04-09 14:13:55
 Total SYN/m: ,961
 Average SYN/s in last minute: ,16.02
@@ -186,7 +187,7 @@ end: ,2023-04-09 15:28:37
 duration: ,1:14:42
 Total SYNs: ,76972
 Average SYN/s: ,17.17
-~~~~~~~
+~~~~~~~,
 start: ,2023-04-09 15:31:18
 Total SYN/m: ,1204
 Average SYN/s in last minute: ,20.07
@@ -196,7 +197,7 @@ end: ,2023-04-09 15:33:25
 duration: ,0:02:07
 Total SYNs: ,2326
 Average SYN/s: ,18.26
-~~~~~~~
+~~~~~~~,
 start: ,2023-04-09 15:36:34
 Total SYN/m: ,1179
 Average SYN/s in last minute: ,19.65
